@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        a{
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .wrap{
+            width: 700px;
+            min-height: 400px;
+            background-color:rgb(238, 238, 238);
+            margin: 50px auto;
+        }
+        .wrap h1{
+            line-height: 80px;
+            text-align: center;
+        }
+        .info{
+            margin:0 10px;
+            overflow: hidden;
+        }
+        .info>input{
+            height: 25px;
+            width: 600px;
+            float: left;
+        }
+        .info>button{
+            height: 29px;
+            width: 70px;
+            float: right;
+        }
+        .todolist{
+            margin: 0 20px ;
+            overflow: hidden;
+        }
+        .wrap p{
+            width: 100%;
+            height: 30px;
+            background-color: rgb(204, 204, 204);
+            line-height: 30px;
+            margin-top: 10px;
+            text-indent: 10px;
+            position: relative;
+        }
+        .todolist p:hover a{
+            display: block;
+        }
+        .todolist p>input{
+            margin-right: 5px;
+        }
+        .todolist p>a{
+            color: rgb(250, 78, 90);
+            position: absolute;
+            height: 30px;
+            top: 0px;
+            left: 500px; 
+            display: none;  
+        }
+        .todolist p>a:nth-of-type(2){
+            left: 550px;
+        }
+        .todolist p>input:nth-of-type(2){
+            height: 20px;
+            width: 400px;
+        }
+        .btn{
+            margin: 0 20px;
+            padding-bottom: 20px;
+        }
+        .btn div{
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            text-indent: 10px;
+            margin-bottom: 50px;
+        }
+        .btn div>a{
+            margin-right: 40px;
+        }
+        .btn p{
+            color: gainsboro;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h1>待办任务列表</h1>
+        <div class="info">
+            <input type="text">
+            <button class="add">添加</button>
+        </div>
+        <div class="todolist">
+            <p>
+                <input type="checkbox"><span>任务1</span>
+                <a href="javascript:;" class="change">编辑</a>
+                <a href="javascript:;" class="del">删除</a>
+            </p>
+            <p>
+                <input type="checkbox" ><span>任务1</span>
+                <a href="javascript:;" class="change">编辑</a>
+                <a href="javascript:;" class="del">删除</a>
+            </p>
+            <p>
+                <input type="checkbox" ><span>任务1</span>
+                <a href="javascript:;" class="change">编辑</a>
+                <a href="javascript:;" class="del">删除</a>
+            </p>
+        </div>
+        <div class="btn">
+            <div>
+                <a href="javascript:;">
+                    <input style="margin-right: 4px;" type="checkbox">全部
+                </a>
+                <a href="javascript:;" class="handle">处理</a>
+                <a href="javascript:;" class="delCheck">删除</a>
+            </div>
+            <h1>
+                已处理任务列表
+            </h1>
+        </div>
+    </div>
+    <script src="./utils.js"></script>
+    <script>
+        var $todolist=document.querySelector('.todolist');
+        var $btnInput=document.querySelector('.btn input');
+        // 2、添加新任务
+        addTask();
+        function addTask(){
+            var $input=document.querySelector('.info>input');
+            var $add=document.querySelector('.add');
+            $add.onclick=function(){
+                var text=$input.value;
+                if(text){
+                    var $p=document.createElement('p');
+                    $p.innerHTML=` <input type="checkbox" ><span>${text}</span>
+                    <a href="javascript:;" class="change">编辑</a>
+                    <a href="javascript:;" class="del">删除</a>`;
+                    $todolist.appendChild($p);
+                    var $todolistInput=document.querySelectorAll('.todolist input');
+                    if($btnInput.checked){
+                        for(var i=0;i<$todolistInput.length;i++){
+                            $todolistInput[i].checked= $btnInput.checked;
+                        }
+                    }
+                    $input.value=''
+                }
+                
+            }
+
+        }
+
+        // 3、点击 编辑 显示任务内容位置替换为输入框，自动获得焦点，失去焦点完成编辑，恢复原样
+        changeCon();
+        function changeCon(){
+            on($todolist,'click','.change',function(){
+                var $span=this.parentNode.children[1];
+                var $input=document.createElement('input');
+                $input.className='addCon'
+                $input.value=$span.innerHTML;
+                this.parentNode.replaceChild($input,$span);
+                blur(this.previousElementSibling);
+            })
+
+            // 失去焦点完成编辑
+            function blur(dom){
+                dom.focus();
+                dom.onblur=function(){
+                    var text=dom.value;
+                    var $span=document.createElement('span');
+                    $span.innerHTML=text;
+                    dom.parentNode.replaceChild($span,dom);
+                }
+            }
+
+        }
+        
+        // 4、点击 删除 把当前任务从待办任务列表删除
+        removeTask();
+        function removeTask(){
+            on($todolist,'click','.del',function(){
+                this.parentNode.remove();
+                var $todolistInput=document.querySelectorAll('.todolist input');
+                if($todolistInput.length!=0){
+                    for(var i=0;i<$todolistInput.length;i++){
+                    if(!$todolistInput[i].checked){
+                        $btnInput.checked=false;
+                        return;
+                    }
+                    }
+                    $btnInput.checked=true;
+                }else{
+                    $btnInput.checked=false;
+                }
+                
+
+            })
+        }
+
+        //5.勾选全部  所有任务为选中状态
+        checkAll();
+        function checkAll(){
+            $btnInput.onclick=function(){
+                var $todolistInput=document.querySelectorAll('.todolist input');
+                for(var i=0;i<$todolistInput.length;i++){
+                    $todolistInput[i].checked= this.checked;
+                }
+            }
+        }
+
+        // 6.点击 处理 所有选中的任务从待办任务列表删除，并添加到已处理任务列表
+        fromTasksMove();
+        function fromTasksMove(){
+            var $handle=document.querySelector('.btn .handle');
+            var $btn=document.querySelector('.btn')
+            $handle.onclick=function(){
+                var $todolistInput=document.querySelectorAll('.todolist input');
+                for(var i=0;i<$todolistInput.length;i++){
+                    if($todolistInput[i].checked){
+                        var $p=document.createElement('p');
+                        $p.innerHTML=$todolistInput[i].nextElementSibling.innerHTML;
+                        $btn.appendChild($p);
+                        $todolistInput[i].parentNode.remove();
+                        $btnInput.checked=false;
+                    }
+                }
+            }
+        }
+
+        // 7.点击 删除 所有选中的任务从待办任务列表删除
+        delTask();
+        function delTask(){
+            var $delCheck=document.querySelector('.btn .delCheck');
+            $delCheck.onclick=function(){
+                var $todolistInput=document.querySelectorAll('.todolist input');
+                for(var i=0;i<$todolistInput.length;i++){
+                    if($todolistInput[i].checked){
+                        $todolistInput[i].parentNode.remove();
+                        $btnInput.checked=false;
+                    }
+                }
+            }
+        }
+
+
+        // 8.全选框和每个任务的选择框关联
+        check();
+        function check(){
+            on($todolist,'click','input',function(){
+                var $todolistInput=document.querySelectorAll('.todolist input');
+                var index=0;
+                for(var i=0;i<$todolistInput.length;i++){
+                    if($todolistInput[i].checked){
+                        index++;
+                    }
+                }
+                if(index===$todolistInput.length){
+                    $btnInput.checked=true;
+                }else{
+                    $btnInput.checked=false;
+                }
+            })
+        }
+    </script>
+</body>
+</html>
